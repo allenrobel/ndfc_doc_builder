@@ -9,7 +9,7 @@ from util.ndfc_template_doc_builder import NdfcTemplateDocBuilder
 from ndfc_template_all import NdfcTemplates
 
 # path to the template(s)
-base_path = "/Users/arobel/repos/ansible_dev/dcnm_doc_builder/util/templates/12_1_3b"
+base_path = "/Users/arobel/repos/ansible_dev/ndfc_doc_builder/util/templates/12_1_3b"
 fabric_template_json = f"{base_path}/MSD_Fabric.json"
 all_templates_json = f"{base_path}/templates.json"
 

@@ -2,7 +2,7 @@
 
 For now, run ./util/build_*.py scripts from the directory level above ./util.
 
-cd $HOME/repos/ansible_dev/dcnm_doc_builder
+cd $HOME/repos/ansible_dev/ndfc_doc_builder
 ./util/build_lan_classic_fabric_doc.py
 ./util/build_vxlan_evpn_fabric_doc.py
 ./util/build_vxlan_evpn_msd_fabric_doc.py
