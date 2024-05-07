@@ -6,7 +6,7 @@ Use documentation_json to print the documentation in JSON format.
 Use documentation_yaml to print the documentation in YAML format.
 """
 from util.ndfc_template_doc_builder import NdfcTemplateDocBuilder
-from ndfc_template_all import NdfcTemplates
+from util.ndfc_templates import NdfcTemplates
 
 # path to the template(s)
 base_path = "/Users/arobel/repos/ansible_dev/ndfc_doc_builder/util/templates/12_1_3b"
@@ -25,6 +25,8 @@ all_template.template_json = all_templates_json
 all_template.load()
 
 doc_builder.template_all = all_template
-doc_builder.build_documentation()
+doc_builder.module_author = "Allen Robel (@quantumonion)"
+doc_builder.module_name = "dcnm_fabric"
+doc_builder.commit()
 #doc_builder.documentation_json()
 doc_builder.documentation_yaml()

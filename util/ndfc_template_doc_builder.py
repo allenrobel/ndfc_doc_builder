@@ -9,8 +9,8 @@ The stored JSON should have been retieved via the following URL:
 
 https://<ndfc_ip>/appcenter/cisco/ndfc/api/v1/configtemplate/rest/config/templates/Easy_Fabric #noqa
 """
+import inspect
 import json
-import re
 import sys
 import yaml
 from util.ndfc_template import NdfcTemplate
@@ -18,9 +18,9 @@ from util.ndfc_template import NdfcTemplate
 class NdfcTemplateDocBuilder(NdfcTemplate):
     def __init__(self):
         super().__init__()
-        self.translation = None
+        self.class_name = self.__class__.__name__
         self.suboptions = None
-        self.documentation = None
+        self._init_documentation()
 
     @property
     def template_all(self):
@@ -31,6 +31,9 @@ class NdfcTemplateDocBuilder(NdfcTemplate):
         An instance of NdfcTemplateAll()
         """
         self._properties["template_all"] = value
+
+    def _init_documentation(self):
+        self.documentation = {}
 
     def init_translation(self):
         """
@@ -75,21 +78,24 @@ class NdfcTemplateDocBuilder(NdfcTemplate):
             msg = "exiting. call instance.load_template() first."
             print(f"{msg}")
             sys.exit(1)
-        if self.translation is None:
-            self.init_translation()
+        self.init_translation()
 
-    def build_documentation(self):
-        """
-        Build the documentation for the EasyFabric template.
-        """
-        self.validate_base_prerequisites()
-        if self.template_all is None:
-            msg = "exiting. call instance.template_all first."
-            print(f"{msg}")
-            sys.exit(1)
-        self.documentation = {}
-        self.documentation["module"] = "dcnm_fabric"
-        self.documentation["author"] = "Cisco Systems, Inc."
+
+    def add_module_name(self):
+        method_name = inspect.stack()[0][3]
+        if self.module_name is None:
+            msg = "module_name must be set before calling commit()"
+            raise ValueError(msg)
+        self.documentation["module"] = self.module_name
+
+    def add_module_author(self):
+        method_name = inspect.stack()[0][3]
+        if self.module_author is None:
+            msg = "module_author must be set before calling commit()"
+            raise ValueError(msg)
+        self.documentation["author"] = self.module_author
+
+    def module_description(self):
         self.documentation["description"] = []
         self.documentation["description"].append(
             "Manage creation and configuration of NDFC fabrics."
@@ -97,6 +103,19 @@ class NdfcTemplateDocBuilder(NdfcTemplate):
         # self.documentation["description"].append(
         #     self.get_template_description(self.template)
         # )
+
+    def commit(self):
+        """
+        Build the documentation for the template.
+        """
+        self.validate_base_prerequisites()
+        if self.template_all is None:
+            msg = "exiting. call instance.template_all first."
+            print(f"{msg}")
+            sys.exit(1)
+        self.add_module_name()
+        self.add_module_author()
+        self.module_description()
         self.documentation["options"] = {}
         self.documentation["options"]["state"] = {}
         self.documentation["options"]["state"]["description"] = []

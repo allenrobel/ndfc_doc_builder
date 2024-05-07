@@ -3,7 +3,10 @@
 Name: ndfc_template.py
 Description:
 
-Superclass for NdfcTemplateEasyFabric() and NdfcTemplateAll()
+Superclass for:
+    - NdfcTemplateDocBuilder()
+    - NdfcTemplates()
+    - NdfcTemplateRaw()
 """
 import re
 import sys
@@ -17,6 +20,8 @@ class NdfcTemplate:
         self._properties = {}
         self._properties["template"] = None
         self._properties["template_json"] = None
+        self._properties["module_author"] = None
+        self._properties["module_name"] = None
 
         self._parameter_type_translation = {}
         self._parameter_type_translation["bool"] = "bool"
@@ -33,6 +38,37 @@ class NdfcTemplate:
         self._parameter_type_translation["macAddress"] = "str"
         self._parameter_type_translation["string[]"] = "str"
         self._parameter_type_translation["structureArray"] = "list"
+
+    @property
+    def module_author(self):
+        """
+        The author of the module.  e.g. jimi_hendrix (@jimi)
+
+        getter: return module_name
+        setter: set module_name
+
+        Mandatory
+        """
+        return self._properties["module_author"]
+    @module_author.setter
+    def module_author(self, value):
+        self._properties["module_author"] = value
+
+
+    @property
+    def module_name(self):
+        """
+        The name of the module.  e.g. dcnm_fabric.
+
+        getter: return module_name
+        setter: set module_name
+
+        Mandatory
+        """
+        return self._properties["module_name"]
+    @module_name.setter
+    def module_name(self, value):
+        self._properties["module_name"] = value
 
     @property
     def template(self):
