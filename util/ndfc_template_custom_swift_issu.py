@@ -208,7 +208,7 @@ class NdfcTemplateCustomSwiftIssu(NdfcTemplate):
             suboptions[name] = {}
             suboptions[name]["description"] = []
             suboptions[name]["description"].append(self.get_description(item))
-            suboptions[name]["type"] = self.get_param_type(item)
+            suboptions[name]["type"] = self.get_parameter_type(item)
             suboptions[name]["required"] = self.is_required(item)
             default = self.get_default_value(item)
             if default:
