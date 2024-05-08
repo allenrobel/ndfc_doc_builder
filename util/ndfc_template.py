@@ -4,7 +4,7 @@ Name: ndfc_template.py
 Description:
 
 Superclass for:
-    - NdfcTemplateDocBuilder()
+    - NdfcDocBuilder()
     - NdfcTemplates()
     - NdfcTemplateRaw()
 """

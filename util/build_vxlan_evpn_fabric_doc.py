@@ -5,7 +5,7 @@ Print Ansible documentation for the NDFC Easy Fabric Template.
 Use documentation_json to print the documentation in JSON format.
 Use documentation_yaml to print the documentation in YAML format.
 """
-from util.ndfc_template_doc_builder import NdfcTemplateDocBuilder
+from util.ndfc_doc_builder import NdfcDocBuilder
 from util.ndfc_templates import NdfcTemplates
 
 # path to the template(s)
@@ -13,7 +13,7 @@ base_path = "/Users/arobel/repos/ansible_dev/ndfc_doc_builder/util/templates/12_
 fabric_template_json = f"{base_path}/Easy_Fabric.json"
 all_templates_json = f"{base_path}/templates.json"
 
-doc_builder = NdfcTemplateDocBuilder()
+doc_builder = NdfcDocBuilder()
 doc_builder.template_json = fabric_template_json
 doc_builder.load()
 

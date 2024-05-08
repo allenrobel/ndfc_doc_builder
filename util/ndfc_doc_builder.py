@@ -15,7 +15,7 @@ import sys
 import yaml
 from util.ndfc_template import NdfcTemplate
 
-class NdfcTemplateDocBuilder(NdfcTemplate):
+class NdfcDocBuilder(NdfcTemplate):
     def __init__(self):
         super().__init__()
         self.class_name = self.__class__.__name__
