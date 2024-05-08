@@ -26,6 +26,8 @@ all_template.load()
 doc_builder.template_all = all_template
 doc_builder.module_author = "Allen Robel (@quantumonion)"
 doc_builder.module_name = "dcnm_fabric"
+doc_builder.module_states = ["deleted", "merged", "query", "replaced"]
+doc_builder.module_default_state = "merged"
 doc_builder.commit()
 #doc_builder.documentation_json()
 doc_builder.documentation_yaml()

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Print Ansible documentation for the NDFC Easy Fabric Template.
+Print Ansible documentation for the NDFC LAN_Classic Template.
 
 Use documentation_json to print the documentation in JSON format.
 Use documentation_yaml to print the documentation in YAML format.
@@ -26,6 +26,8 @@ all_template.load()
 doc_builder.template_all = all_template
 doc_builder.module_author = "Allen Robel (@quantumonion)"
 doc_builder.module_name = "dcnm_fabric"
+doc_builder.module_states = ["deleted", "merged", "query", "replaced"]
+doc_builder.module_default_state = "merged"
 doc_builder.commit()
 #doc_builder.documentation_json()
 doc_builder.documentation_yaml()

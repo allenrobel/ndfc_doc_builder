@@ -20,6 +20,7 @@ class NdfcDocBuilder:
         self.class_name = self.__class__.__name__
         self.ndfc_template = NdfcTemplate()
         self.suboptions = None
+        self._valid_ansible_states = ["deleted", "merged", "overridden", "query", "replaced"]
         self._init_properties()
         self._init_documentation()
 
@@ -27,6 +28,8 @@ class NdfcDocBuilder:
         self._properties = {}
         self._properties["module_name"] = None
         self._properties["module_author"] = None
+        self._properties["module_default_state"] = None
+        self._properties["module_states"] = None
 
     @property
     def module_author(self):
@@ -43,7 +46,6 @@ class NdfcDocBuilder:
     def module_author(self, value):
         self._properties["module_author"] = value
 
-
     @property
     def module_name(self):
         """
@@ -58,6 +60,59 @@ class NdfcDocBuilder:
     @module_name.setter
     def module_name(self, value):
         self._properties["module_name"] = value
+
+    @property
+    def module_default_state(self):
+        """
+        The default Ansible state for the module.
+
+        -   getter: return the default Ansible state.
+        -   setter: set the default Ansible state.
+        -   setter: raise ``ValueError`` if module_default_state is not
+            a valid Ansible state.
+        -   Mandatory
+        """
+        return self._properties["module_default_state"]
+
+    @module_default_state.setter
+    def module_default_state(self, value):
+        if value not in self._valid_ansible_states:
+            msg = f"Invalid Ansible state {value}. "
+            msg += f"Expected one of {','.join(sorted(self._valid_ansible_states))}"
+            raise ValueError(msg)
+        self._properties["module_default_state"] = value
+
+    @property
+    def module_states(self):
+        """
+        A python list of Ansible states support by the module.
+
+        Example
+        ```python
+        instance.module_states = ["deleted", "merged", "query", "replaced"]
+        ```
+
+        -   getter: return module_states
+        -   setter: set module_states
+        -   setter: raise ``ValueError`` if module_states is not a list()
+        -   setter: raise ``ValueError`` if any of the states in the list()
+                    is not a valid Ansible state.
+        -   Mandatory
+        """
+        return self._properties["module_states"]
+    @module_states.setter
+    def module_states(self, value):
+        if not isinstance(value, list):
+            msg = "Expected list() for instance.module_states. "
+            msg += f"Got: {type(value).__name__}."
+            raise ValueError(msg)
+        for item in value:
+            if item in self._valid_ansible_states:
+                continue
+            msg = f"Invalid Ansible state {item}. "
+            msg += f"Expected one of {','.join(sorted(self._valid_ansible_states))}"
+            raise ValueError(msg)
+        self._properties["module_states"] = value
 
     @property
     def template_all(self):
@@ -153,6 +208,23 @@ class NdfcDocBuilder:
             raise ValueError(msg)
         self.documentation["author"] = self.module_author
 
+    def add_module_state(self):
+        method_name = inspect.stack()[0][3]
+        if self.module_states is None:
+            msg = "Call instance.module_states before calling instance.commit()"
+            raise ValueError(msg)
+        if self.module_default_state is None:
+            msg = "Call instance.module_default_state before calling instance.commit()"
+            raise ValueError(msg)
+        self.documentation["options"]["state"] = {}
+        self.documentation["options"]["state"]["description"] = []
+        value = "The state of DCNM after module completion"
+        self.documentation["options"]["state"]["description"].append(value)
+        # states = [f"I({x})" for x in self.module_states]
+        self.documentation["options"]["state"]["type"] = "str"
+        self.documentation["options"]["state"]["choices"] = self.module_states
+        self.documentation["options"]["state"]["default"] = self.module_default_state
+
     def module_description(self):
         self.documentation["description"] = []
         self.documentation["description"].append(
@@ -175,15 +247,7 @@ class NdfcDocBuilder:
         self.add_module_author()
         self.module_description()
         self.documentation["options"] = {}
-        self.documentation["options"]["state"] = {}
-        self.documentation["options"]["state"]["description"] = []
-        value = "The state of DCNM after module completion"
-        self.documentation["options"]["state"]["description"].append(value)
-        value = "I(deleted), I(merged), and I(query) states are supported."
-        self.documentation["options"]["state"]["description"].append(value)
-        self.documentation["options"]["state"]["type"] = "str"
-        self.documentation["options"]["state"]["choices"] = ["deleted", "merged", "query", "replaced"]
-        self.documentation["options"]["state"]["default"] = "merged"
+        self.add_module_state()
         self.documentation["options"]["config"] = {}
         self.documentation["options"]["config"]["description"] = []
         value = "A list of fabric configuration dictionaries"
