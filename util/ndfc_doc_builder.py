@@ -31,6 +31,10 @@ class NdfcDocBuilder:
         self._properties["module_default_state"] = None
         self._properties["module_states"] = None
 
+    def _init_documentation(self):
+        self.documentation = {}
+        self.documentation["options"] = {}
+
     @property
     def module_author(self):
         """
@@ -135,8 +139,6 @@ class NdfcDocBuilder:
         """
         self._properties["template_json"] = value
 
-    def _init_documentation(self):
-        self.documentation = {}
 
     def init_translation(self):
         """
@@ -209,7 +211,6 @@ class NdfcDocBuilder:
         self.documentation["author"] = self.module_author
 
     def add_module_state(self):
-        method_name = inspect.stack()[0][3]
         if self.module_states is None:
             msg = "Call instance.module_states before calling instance.commit()"
             raise ValueError(msg)
@@ -225,7 +226,7 @@ class NdfcDocBuilder:
         self.documentation["options"]["state"]["choices"] = self.module_states
         self.documentation["options"]["state"]["default"] = self.module_default_state
 
-    def module_description(self):
+    def add_module_description(self):
         self.documentation["description"] = []
         self.documentation["description"].append(
             "Manage creation and configuration of NDFC fabrics."
@@ -245,8 +246,7 @@ class NdfcDocBuilder:
             sys.exit(1)
         self.add_module_name()
         self.add_module_author()
-        self.module_description()
-        self.documentation["options"] = {}
+        self.add_module_description()
         self.add_module_state()
         self.documentation["options"]["config"] = {}
         self.documentation["options"]["config"]["description"] = []
