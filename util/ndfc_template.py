@@ -59,15 +59,19 @@ class NdfcTemplate:
         self._properties["template_json"] = value
 
     @staticmethod
-    def delete_key(key, dictionary):
+    def delete_key(key, item:dict):
         """
-        Delete key from dictionary
+        Delete key from item
         """
-        if key in dictionary:
-            del dictionary[key]
-        return dictionary
+        if key in item:
+            del item[key]
+        return item
 
-    def get_default_value_meta_properties(self, item):
+    def get_default_value_meta_properties(self, item:dict):
+        """
+        Return the value of metaProperties.defaultValue if present.
+        Return None otherwise.
+        """
         try:
             result = item["metaProperties"]["defaultValue"]
         except KeyError:
@@ -75,7 +79,11 @@ class NdfcTemplate:
         result = self.clean_string(result)
         return result
 
-    def get_default_value_root(self, item):
+    def get_default_value_root(self, item:dict):
+        """
+        Return the value of defaultValue if present.
+        Return None otherwise.
+        """
         try:
             result = item["defaultValue"]
         except KeyError:
@@ -83,11 +91,13 @@ class NdfcTemplate:
         result = self.clean_string(result)
         return result
 
-    def get_default_value(self, item):
+    def get_default_value(self, item:dict):
         """
-        Return the default value for item, if it exists.
-        Return None otherwise.
-        item["metaProperties"]["defaultValue"]
+        -   Return the default value for item, if it exists.
+        -   Return None otherwise.
+        -   The default value may reside at the following locations:
+                -   item.metaProperties.defaultValue
+                -   item.defaultValue
         """
         result = self.get_default_value_meta_properties(item)
         if result is not None:
@@ -96,10 +106,10 @@ class NdfcTemplate:
         return result
 
 
-    def get_description(self, item):
+    def get_description(self, item:dict):
         """
-        Return the description of an item, i.e.:
-        item['annotations']['Description']
+        -   Return the description of an item.
+        -   item.annotations.Description
         """
         try:
             description = item['annotations']['Description']
@@ -109,44 +119,39 @@ class NdfcTemplate:
         description = self.clean_description(description)
         return description
 
-    def get_dict_value(self, dictionary, key):
+    def get_dict_value(self, item:dict, key):
         """
-        Return value of the first instance of key found via
-        recursive search of dictionary
-
-        Return None if key is not found
+        -   Return value of the first instance of key found via
+            recursive search of dictionary.
+        -   Return None if key is not found.
         """
-        if not isinstance(dictionary, dict):
+        if not isinstance(item, dict):
             return None
-        if key in dictionary: return dictionary[key]
-        for k, v in dictionary.items():
+        if key in item: return item[key]
+        for k, v in item.items():
             if isinstance(v,dict):
                 item = self.get_dict_value(v, key)
                 if item is not None:
                     return item
         return None
 
-    def get_display_name(self, item):
+    def get_display_name(self, item:dict):
         """
-        Return the NDFC GUI label for an item, i.e.:
-        item['annotations']['DisplayName']
+        -   Return the NDFC GUI label for an item.
+        -   item.annotations.DisplayName
         """
         result = self.get_dict_value(item, "DisplayName")
         return self.clean_string(result)
 
-    def get_enum(self, item):
+    def get_enum(self, item:dict):
         """
-        Return the enum for an item as a list()
-        Return an empty list if the key does not exist
-        item["annotations"]["Enum"]
+        -   Return the enum for an item as a list().
+        -   Return an empty list if the key does not exist.
+        -   item.annotations.Enum
         """
         result = self.get_dict_value(item, "Enum")
         if result is None:
             return []
-        # if "annotations" not in item:
-        #     return []
-        # if "Enum" not in item["annotations"]:
-        #     return []
         result = self.clean_string(result)
         result = result.split(",")
         try:
@@ -155,13 +160,12 @@ class NdfcTemplate:
             pass
         return result
 
-    def get_min_max(self, item):
+    def get_min_max(self, item:dict):
         """
-        Return the min and max values of an item from the item's description
-        Otherwise return None, None
-
-        If item['annotations']['Description'] contains
-        "(Min: X, Max: Y)" return int(X), and int(Y)
+        -   Return the min and max values of an item from the item's description.
+        -   Return None, None otherwise.
+        -   If item.annotations.Description contains "(Min: X, Max: Y)"
+            return int(X), and int(Y)
         """
         result = self.get_dict_value(item, "Description")
         if result is None:
@@ -172,52 +176,47 @@ class NdfcTemplate:
             return int(m.group(1)), int(m.group(2))
         return None, None
 
-    def get_min(self, item):
+    def get_min(self, item:dict):
         """
-        Return the minimum value of an item
-        Otherwise return None
-
-        Typically, item['metaProperties']['min']
+        -   Return the minimum value of an item.
+        -   Return None otherwise.
+        -   item.metaProperties.min
         """
         result = self.get_dict_value(item, "min")
         return self.clean_string(result)
 
-    def get_max(self, item):
+    def get_max(self, item:dict):
         """
-        Return the maximum value of an item
-        Otherwise return None
-
-        Typically, item['metaProperties']['max']
+        -   Return the maximum value of an item.
+        -   Return None otherwise.
+        -   item.metaProperties.max
         """
         result = self.get_dict_value(item, "max")
         return self.clean_string(result)
 
-    def get_min_length(self, item):
+    def get_min_length(self, item:dict):
         """
-        Return the minimum length of an item
-        Otherwise return None
-
-        Typically, item['metaProperties']['minLength']
+        -   Return the minimum length of an item.
+        -   Return None otherwise.
+        -   item.metaProperties.minLength
         """
         result = self.get_dict_value(item, "minLength")
         return self.clean_string(result)
 
-    def get_max_length(self, item):
+    def get_max_length(self, item:dict):
         """
-        Return the maximum length of an item
-        Otherwise return None
-
-        Typically, item['metaProperties']['maxLength']
+        -   Return the maximum length of an item.
+        -   Return None otherwise.
+        -   item.metaProperties.maxLength
         """
-        result = self.get_dict_value(item, "minLength")
+        result = self.get_dict_value(item, "maxLength")
         return self.clean_string(result)
 
     def get_name(self, item):
         """
-        Return the name of an item
-        Otherwise return None
-
-        Typically, item['name']
+        -   Return the name of an item
+        -   Return None otherwise.
+        -   item.name
         """
         try:
             result = item['name']
@@ -225,29 +224,28 @@ class NdfcTemplate:
             result = "unknown"
         return self.clean_string(result)
 
-    def is_internal(self, item):
+    def is_internal(self, item:dict):
         """
-        Return True if item["annotations"]["IsInternal"] is True
-        Return False otherwise
+        -   Return True if item.annotations.IsInternal is True.
+        -   Return False otherwise.
         """
         result = self.get_dict_value(item, "IsInternal")
         return self.make_bool(result)
 
     def is_optional(self,item):
         """
-        Return the optional status of an item (True or False) if it exists.
-
-        Otherwise return None
+        -   Return the optional status of an item (True or False) if it exists.
+        -   Return None otherwise.
+        -   item.optional
         """
         result = self.make_bool(item.get('optional', None))
         return result
 
-    def get_parameter_type(self, item):
+    def get_parameter_type(self, item:dict):
         """
-        Return the parameter type of an item if it exists.
-        Otherwise return None
-
-        Typically, item['parameterType']
+        -   Return the parameter type of an item if it exists.
+        -   Return None otherwise.
+        -   item.parameterType
         """
         result = self.get_dict_value(item, 'parameterType')
         if result is None:
@@ -272,104 +270,102 @@ class NdfcTemplate:
 
     def get_section(self, item):
         """
-        Return the Section annotation of an item
-        Otherwise return None
-
-        Typically, item['annotations']['Section']
+        -   Return the Section annotation of an item
+        -   Return None otherwise.
+        -   item.annotations.Section
         """
         result = self.get_dict_value(item, "Section")
         return self.clean_string(result)
 
-    def get_template_content_type(self, template):
+    def get_template_content_type(self, item:dict):
         """
-        Return the type of the template if it exists.
-        Return None otherwise.
-        template['type']
+        -   Return the type of the template if it exists.
+        -   Return None otherwise.
+        -   item.contentType
         """
         try:
-            result = template['contentType']
+            result = item['contentType']
         except KeyError:
             result = "unknown"
         return self.clean_string(result)
 
-    def get_template_description(self, template):
+    def get_template_description(self, item:dict):
         """
-        Return the description of the template if it exists.
-        Return None otherwise.
-        template['description']
+        -   Return the description of the template if it exists.
+        -   Return None otherwise.
+        -   item.description.
         """
         try:
-            result = template['description']
+            result = item['description']
         except KeyError:
             result = "unknown"
         return self.clean_string(result)
 
-    def get_template_name(self, template):
+    def get_template_name(self, item:dict):
         """
-        Return the name of the template if it exists.
-        Return None otherwise.
-        template['name']
+        -   Return the name of the template if it exists.
+        -   Return None otherwise.
+        -   item.name
         """
         try:
-            result = template['name']
+            result = item['name']
         except KeyError:
             result = "unknown"
         return self.clean_string(result)
 
-    def get_template_subtype(self, template):
+    def get_template_subtype(self, item:dict):
         """
-        Return the subtype of the template if it exists.
-        Return None otherwise.
-        template['templateSubType']
+        -   Return the subtype of the template if it exists.
+        -   Return None otherwise.
+        -   item.templateSubType
         """
         try:
-            result = template['templateSubType']
+            result = item['templateSubType']
         except KeyError:
             result = "unknown"
         return self.clean_string(result)
 
-    def get_template_supported_platforms(self, template):
+    def get_template_supported_platforms(self, item:dict):
         """
-        Return the supportedPlatforms of the template if it exists.
-        Return None otherwise.
-        template['supportedPlatforms']
+        -   Return the supportedPlatforms of the template if it exists.
+        -   Return None otherwise.
+        -   item.supportedPlatforms
         """
         try:
-            result = template['supportedPlatforms']
+            result = item['supportedPlatforms']
         except KeyError:
             result = "unknown"
         return self.clean_string(result)
 
-    def get_template_tags(self, template):
+    def get_template_tags(self, item:dict):
         """
-        Return the tags of the template if it exists.
-        Return None otherwise.
-        template['tags']
+        -   Return the tags of the template if it exists.
+        -   Return None otherwise.
+        -   item.tags
         """
         try:
-            result = template['tags']
+            result = item['tags']
         except KeyError:
             result = "unknown"
         return self.clean_string(result)
 
-    def get_template_type(self, template):
+    def get_template_type(self, item:dict):
         """
-        Return the type of the template if it exists.
-        Return None otherwise.
-        template['templateType']
+        -   Return the type of the template if it exists.
+        -   Return None otherwise.
+        -   item.templateType
         """
         try:
-            result = template['templateType']
+            result = item['templateType']
         except KeyError:
             result = "unknown"
         return self.clean_string(result)
 
-    def get_valid_values(self, item):
+    def get_valid_values(self, item:dict):
         """
-        Return the validValues annotation of an item
-        Otherwise return None
-
-        Typically, item['metaProperties']['validValues']
+        -   Return the validValues annotation of an item
+        -   Return None otherwise.
+        -   item.metaProperties.validValues
         """
         result = self.get_dict_value(item, "validValues")
         if result is None:
@@ -381,15 +377,14 @@ class NdfcTemplate:
             pass
         return result
 
-    def is_mandatory(self, item):
+    def is_mandatory(self, item:dict):
         """
-        Return the mandatory status of a parameter
-        True if the parameter is mandatory.
-        False if a default value exists for the parameter.
-        False if the parameter is optional.
-        False if the IsMandatory key does not exist
-
-        item["annotations"]["IsMandatory"]
+        -   Return the mandatory status of item.
+                -   True if the item is mandatory.
+                -   False if a default value exists for item.
+                -   False if item is optional.
+                -   False if the IsMandatory key does not exist.
+        -   item.annotations.IsMandatory
         """
         default = self.get_default_value(item)
         if default is not None or default != "":
@@ -397,23 +392,23 @@ class NdfcTemplate:
         result = self.get_dict_value(item, "IsMandatory")
         return self.make_bool(result)
 
-    def is_hidden(self, item):
+    def is_hidden(self, item:dict):
         """
-        Return True if item["annotations"]["Section"] is "Hidden"
-        Return False otherwise
+        -   Return True if item.annotations.Section is "Hidden".
+        -   Return False otherwise.
+        -   item.annotations.Section.
         """
         result = self.get_section(item)
         if "Hidden" in result:
             return True
         return False
 
-    def is_required(self,item):
+    def is_required(self,item:dict):
         """
-        Return the required status of an item (True or False)
-        The inverse of item['optional']
-
-        Return False if the item has a default value.
-        Otherwise return None
+        -   Return the required status of an item (True or False)
+        -   Return False if the item has a default value.
+        -   Return the inverse of item.optional otherwise.
+        -   Return None if all else fails.
         """
         default = self.get_default_value(item)
         if default is not None or default != "":
@@ -425,16 +420,21 @@ class NdfcTemplate:
             return True
         return None
 
-
     @staticmethod
     def make_bool(value):
         """
-        Translate various string values to a boolean value
+        -   Translate various string values to a boolean value.
+        -   Return True if value.lower() in [true, yes]
+        -   Return False if value.lower() in [false, no]
+        -   Return value otherwise.
         """
-        if value in ["true", "yes", "True", "Yes", "TRUE", "YES"]:
-            return True
-        if value in ["false", "no", "False", "No", "FALSE", "NO"]:
-            return False
+        try:
+            if str(value).lower() in ["true", "yes"]:
+                return True
+            if str(value).lower() in ["false", "no"]:
+                return False
+        except:
+            return value
         return value
 
     def clean_string(self, string):
