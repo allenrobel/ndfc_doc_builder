@@ -15,7 +15,6 @@ all_templates_json = f"{base_path}/templates.json"
 
 doc_builder = NdfcDocBuilder()
 doc_builder.template_json = fabric_template_json
-doc_builder.load()
 
 # NdfcTemplates() instance is required to get the choices for
 # several parameters e.g. default_network_universal choices

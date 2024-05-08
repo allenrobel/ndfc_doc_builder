@@ -15,12 +15,49 @@ import sys
 import yaml
 from util.ndfc_template import NdfcTemplate
 
-class NdfcDocBuilder(NdfcTemplate):
+class NdfcDocBuilder:
     def __init__(self):
-        super().__init__()
         self.class_name = self.__class__.__name__
+        self.ndfc_template = NdfcTemplate()
         self.suboptions = None
+        self._init_properties()
         self._init_documentation()
+
+    def _init_properties(self):
+        self._properties = {}
+        self._properties["module_name"] = None
+        self._properties["module_author"] = None
+
+    @property
+    def module_author(self):
+        """
+        The author of the module.  e.g. jimi_hendrix (@jimi)
+
+        getter: return module_name
+        setter: set module_name
+
+        Mandatory
+        """
+        return self._properties["module_author"]
+    @module_author.setter
+    def module_author(self, value):
+        self._properties["module_author"] = value
+
+
+    @property
+    def module_name(self):
+        """
+        The name of the module.  e.g. dcnm_fabric.
+
+        getter: return module_name
+        setter: set module_name
+
+        Mandatory
+        """
+        return self._properties["module_name"]
+    @module_name.setter
+    def module_name(self, value):
+        self._properties["module_name"] = value
 
     @property
     def template_all(self):
@@ -31,6 +68,17 @@ class NdfcDocBuilder(NdfcTemplate):
         An instance of NdfcTemplateAll()
         """
         self._properties["template_all"] = value
+
+    @property
+    def template_json(self):
+        return self._properties["template_json"]
+    @template_json.setter
+    def template_json(self, value):
+        """
+        Full path to a file containing the template content
+        in JSON format
+        """
+        self._properties["template_json"] = value
 
     def _init_documentation(self):
         self.documentation = {}
@@ -44,8 +92,13 @@ class NdfcDocBuilder(NdfcTemplate):
 
         The dictionary excludes hidden and internal parameters.
         """
-        if self.template is None:
-            msg = "exiting. call instance.load_template() first."
+        if self.ndfc_template is None:
+            msg = "exiting. call instance.ndfc_template() first."
+            print(f"{msg}")
+            sys.exit(1)
+
+        if self.ndfc_template.template is None:
+            msg = "exiting. call instance.ndfc_template.load_template() first."
             print(f"{msg}")
             sys.exit(1)
         self.translation = {}
@@ -54,12 +107,12 @@ class NdfcDocBuilder(NdfcTemplate):
             "DEAFULT_QUEUING_POLICY_OTHER": "DEFAULT_QUEUING_POLICY_OTHER",
             "DEAFULT_QUEUING_POLICY_R_SERIES": "DEFAULT_QUEUING_POLICY_R_SERIES",
         }
-        for item in self.template.get("parameters"):
-            if self.is_internal(item):
+        for item in self.ndfc_template.template.get("parameters"):
+            if self.ndfc_template.is_internal(item):
                 continue
-            if self.is_hidden(item):
+            if self.ndfc_template.is_hidden(item):
                 continue
-            name = self.get_name(item)
+            name = self.ndfc_template.get_name(item)
             if not name:
                 continue
             if name in typo_keys:
@@ -74,10 +127,15 @@ class NdfcDocBuilder(NdfcTemplate):
             - User has set self.template_all
         2. Call self.init_translation() if self.translation is None
         """
-        if self.template is None:
-            msg = "exiting. call instance.load_template() first."
+
+        if self.template_json is None:
+            msg = "exiting. call instance.template_json first."
             print(f"{msg}")
             sys.exit(1)
+
+        self.ndfc_template.template_json = self.template_json
+        self.ndfc_template.load()
+
         self.init_translation()
 
 
@@ -135,17 +193,17 @@ class NdfcDocBuilder(NdfcTemplate):
         self.documentation["options"]["config"]["suboptions"] = {}
 
         suboptions = {}
-        for item in self.template.get("parameters"):
-            if self.is_internal(item):
+        for item in self.ndfc_template.template.get("parameters"):
+            if self.ndfc_template.is_internal(item):
                 continue
-            if self.is_hidden(item):
+            if self.ndfc_template.is_hidden(item):
                 continue
             if not item.get('name', None):
                 continue
             name = self.translation.get(item['name'], item['name'])
             suboptions[name] = {}
             suboptions[name]["description"] = []
-            description = self.get_description(item)
+            description = self.ndfc_template.get_description(item)
             if description is None or description == "":
                 description = "No description available"
             # ndfc_label = self.get_display_name(item)
@@ -160,12 +218,12 @@ class NdfcDocBuilder(NdfcTemplate):
             #     suboptions[name]["description"].append(f"ndfc_label, {ndfc_label}")
             # if ndfc_section is not None:
             #     suboptions[name]["description"].append(f"ndfc_section, {ndfc_section}")
-            suboptions[name]["type"] = self.get_parameter_type(item)
-            suboptions[name]["required"] = self.is_required(item)
-            default = self.get_default_value(item)
+            suboptions[name]["type"] = self.ndfc_template.get_parameter_type(item)
+            suboptions[name]["required"] = self.ndfc_template.is_required(item)
+            default = self.ndfc_template.get_default_value(item)
             if default is not None:
                 suboptions[name]["default"] = default
-            choices  = self.get_enum(item)
+            choices  = self.ndfc_template.get_enum(item)
             if len(choices) > 0:
                 if "TEMPLATES" in str(choices[0]):
                     tag = str(choices[0]).split(".")[1]
@@ -174,7 +232,6 @@ class NdfcDocBuilder(NdfcTemplate):
 
         self.documentation["options"]["config"]["suboptions"] = {}
         for key in sorted(suboptions.keys()):
-            # self.documentation["options"]["config"]["suboptions"].append({key: suboptions[key]})
             self.documentation["options"]["config"]["suboptions"][key] = suboptions[key]
 
     def documentation_yaml(self):
@@ -182,7 +239,8 @@ class NdfcDocBuilder(NdfcTemplate):
         Dump the documentation in YAML format
         """
         if self.documentation is None:
-            self.build_documentation()
+            msg = "Call instance.commit() before calling instance.documentation_yaml()"
+            raise ValueError(msg)
         print(yaml.dump(self.documentation, indent=4))
 
     def documentation_json(self):
@@ -190,5 +248,6 @@ class NdfcDocBuilder(NdfcTemplate):
         Dump the documentation in JSON format
         """
         if self.documentation is None:
-            self.build_documentation()
+            msg = "Call instance.commit() before calling instance.documentation_json()"
+            raise ValueError(msg)
         print(json.dumps(self.documentation, indent=4))
