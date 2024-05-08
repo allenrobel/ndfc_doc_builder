@@ -16,6 +16,42 @@ import yaml
 from util.ndfc_template import NdfcTemplate
 
 class NdfcDocBuilder:
+    """
+    - ### Build Ansible documentation in YAML format from an NDFC template.
+
+    - ### Can also dump the documentation as a JSON document.
+
+    - Usage example
+
+    ```python
+        from util.ndfc_doc_builder import NdfcDocBuilder
+        from util.ndfc_templates import NdfcTemplates
+
+        # path to the template(s)
+        base_path = "/Users/arobel/repos/ansible_dev/ndfc_doc_builder/util/templates/12_1_3b"
+        fabric_template_json = f"{base_path}/LAN_Classic.json"
+        all_templates_json = f"{base_path}/templates.json"
+
+        doc_builder = NdfcDocBuilder()
+        doc_builder.template_json = fabric_template_json
+
+        # NdfcTemplates() instance is required to get the choices for
+        # several parameters e.g. default_network_universal choices
+        # of Default_Network_Universal and Service_Network_Universal
+        all_template = NdfcTemplates()
+        all_template.template_json = all_templates_json
+        all_template.load()
+
+        doc_builder.template_all = all_template
+        doc_builder.module_author = "Allen Robel (@quantumonion)"
+        doc_builder.module_name = "dcnm_fabric"
+        doc_builder.module_states = ["deleted", "merged", "query", "replaced"]
+        doc_builder.module_default_state = "merged"
+        doc_builder.commit()
+        #doc_builder.documentation_json()
+        doc_builder.documentation_yaml()
+    ```
+    """
     def __init__(self):
         self.class_name = self.__class__.__name__
         self.ndfc_template = NdfcTemplate()
