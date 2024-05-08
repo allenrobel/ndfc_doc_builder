@@ -17,24 +17,51 @@ class NdfcTemplate:
     Superclass for NdfcTemplate*() classes
     """
     def __init__(self):
+        self._init_properties()
+        self._init_translation()
+
+    def _init_properties(self):
+        """
+        Initialize properties used in this class.
+        """
         self._properties = {}
         self._properties["template"] = None
         self._properties["template_json"] = None
 
+    def _init_translation(self):
+        """
+        -   Initialize mapping between NDFC template item parameterType
+            and Ansible types.
+        -   Keys: NDFC template parameterType.
+        -   Values: Ansible types.
+        """
         self._parameter_type_translation = {}
         self._parameter_type_translation["bool"] = "bool"
+        self._parameter_type_translation["boolean"] = "bool"
+        self._parameter_type_translation["BOOLEAN"] = "bool"
         self._parameter_type_translation["enum"] = "str"
         self._parameter_type_translation["int"] = "int"
+        self._parameter_type_translation["integer"] = "int"
+        self._parameter_type_translation["INT"] = "int"
+        self._parameter_type_translation["INTEGER"] = "int"
         self._parameter_type_translation["interfaceRange"] = "str"
         self._parameter_type_translation["integerRange"] = "str"
+        self._parameter_type_translation["ipAddress"] = "str"
+        self._parameter_type_translation["ipAddressList"] = "str"
+        self._parameter_type_translation["ipV4Address"] = "str"
+        self._parameter_type_translation["ipV4AddressWithSubnet"] = "str"
+        self._parameter_type_translation["ipV6Address"] = "str"
+        self._parameter_type_translation["ipV6AddressWithSubnet"] = "str"
         self._parameter_type_translation["ipv4"] = "str"
         self._parameter_type_translation["ipv6"] = "str"
         self._parameter_type_translation["ipv4_subnet"] = "str"
         self._parameter_type_translation["ipv6_subnet"] = "str"
-        self._parameter_type_translation["ipAddressList"] = "str"
         self._parameter_type_translation["list"] = "list"
         self._parameter_type_translation["macAddress"] = "str"
+        self._parameter_type_translation["str"] = "str"
+        self._parameter_type_translation["string"] = "str"
         self._parameter_type_translation["string[]"] = "str"
+        self._parameter_type_translation["STRING"] = "str"
         self._parameter_type_translation["structureArray"] = "list"
 
     @property
@@ -243,27 +270,14 @@ class NdfcTemplate:
 
     def get_parameter_type(self, item:dict):
         """
-        -   Return the parameter type of an item if it exists.
-        -   Return None otherwise.
-        -   item.parameterType
+        -   Translate NDFC template types to Ansible types.
+        -   Return translated item.parameterType if it exists.
+        -   Return None if item.parameterType does not exist.
+        -   Return item.parameterType if no translation exists.
         """
         result = self.get_dict_value(item, 'parameterType')
         if result is None:
             return None
-        if result in ["STRING", "string", "str"]:
-            return "str"
-        if result in ["INTEGER", "INT", "integer", "int"]:
-            return "int"
-        if result in ["BOOLEAN", "boolean", "bool"]:
-            return "bool"
-        if result in ["ipAddress", "ipV4Address"]:
-            return "str"
-        if result in ["ipV4AddressWithSubnet"]:
-            return "str"
-        if result in ["ipV6Address"]:
-            return "str"
-        if result in ["ipV6AddressWithSubnet"]:
-            return "str"
         if result in self._parameter_type_translation:
             return self._parameter_type_translation[result]
         return result
@@ -470,7 +484,10 @@ class NdfcTemplate:
         return string
 
     def clean_description(self, string):
-        # (Min:8, Max:30)
+        """
+        -   Remove (Min: x, Max: y) from string.
+        -   This is sometimes found in template descriptions.
+        """
         string = re.sub(r'\(Min:\s*\d+,\s* Max:\s*\d+\)', '', string)
         return string
 
