@@ -76,7 +76,15 @@ cd $HOME/repos/ansible_dev/ndfc_doc_builder
                         required: false
                         type: str
 
-3. List type requires -> elements: str
+3. IPFM_FABRIC_PARAMETERS. default: 1 needs to be default: "1"
+                    LINK_STATE_ROUTING_TAG:
+                        default: "1"
+                        description:
+                        - Routing process tag for the fabric
+                        required: false
+                        type: str
+
+4. List type requires -> elements: str
 
 
                     NETFLOW_EXPORTER_LIST:
@@ -105,6 +113,17 @@ cd $HOME/repos/ansible_dev/ndfc_doc_builder
                         default: ''
                         description:
                         - One or multiple netflow Samplers. Applicable to N7K only
+                        required: false
+                        type: list
+
+		IPFM_FABRIC_PARAMETERS
+
+                    ASM_GROUP_RANGES:
+                        default: ''
+                        description:
+                        - 'ASM group ranges with prefixes (len:4-32) example: 239.1.1.0/25,
+                            max 20 ranges. Enabling SPT-Threshold Infinity to prevent switchover
+                            to source-tree.'
                         required: false
                         type: list
 
