@@ -42,16 +42,22 @@ class NdfcRequestError(Exception):
 
 class NDFC:
     """
+    ### Description
+
     Methods to login to an NDFC controller and send DELETE,
     GET, POST, PUT requests to NDFC's REST endpoints
 
-    Usage:
+    ### Usage
 
-    # In your shell
+    #### In your shell
+
+    ```bash
     export NDFC_IP4=10.1.1.1
     export NDFC_PASSWORD=my_password
     export NDFC_USERNAME=my_username
-    # In your script
+    ```
+
+    #### In your script
     from ndfc_python.log import Log
     from ndfc_python.ndfc import NDFC
 
