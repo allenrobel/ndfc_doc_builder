@@ -36,6 +36,7 @@ template_name = "Easy_Fabric"
 ## Example template names
 
 | Template Name    | Associated Fabric Type | Notes                                        |
+| ---------------- | ---------------------- | -------------------------------------------- |
 | LAN_Classic      | Classic LAN            |                                              |
 | Easy_Fabric_IPFM | IP Fabric for Media    | NDFC must be in IPFM mode when script is run |
 | Easy_Fabric      | VXLAN/EVPN Fabric      |                                              |
