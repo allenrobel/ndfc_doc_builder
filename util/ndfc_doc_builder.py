@@ -29,6 +29,7 @@ class NdfcDocBuilder:
       export NDFC_IP4=10.1.1.1
       export NDFC_USERNAME=my_username
       export NDFC_PASSWORD=my_password
+      export NDFC_DOMAIN=local
       ```
 
     - Example script
@@ -38,11 +39,13 @@ class NdfcDocBuilder:
 
         # path to the template(s)
         base_path = "/Users/arobel/repos/ansible_dev/ndfc_doc_builder/util/templates/12_1_3b"
-        fabric_template_json = f"{base_path}/LAN_Classic.json"
+        fabric_template_json_file = f"{base_path}/LAN_Classic.json"
         all_templates_json = f"{base_path}/templates.json"
 
         doc_builder = NdfcDocBuilder()
-        doc_builder.template_json = fabric_template_json
+        doc_builder.template_json_file = fabric_template_json
+        # OR use template_dict to pass a python dictionary representation of the template
+        # doc_builder.template_dict = <template dictionary>
 
         # NdfcTemplates() instance is required to get the choices for
         # several parameters e.g. default_network_universal choices
@@ -70,12 +73,11 @@ class NdfcDocBuilder:
         self._init_documentation()
 
     def _init_properties(self):
-        self._properties = {}
-        self._properties["module_name"] = None
-        self._properties["module_author"] = None
-        self._properties["module_default_state"] = None
-        self._properties["module_states"] = None
-
+        self._module_name = None
+        self._module_author = None
+        self._module_default_state = None
+        self._module_states = None
+        self._template_all = None
     def _init_documentation(self):
         self.documentation = {}
         self.documentation["options"] = {}
@@ -90,10 +92,10 @@ class NdfcDocBuilder:
 
         Mandatory
         """
-        return self._properties["module_author"]
+        return self._module_author
     @module_author.setter
     def module_author(self, value):
-        self._properties["module_author"] = value
+        self._module_author = value
 
     @property
     def module_name(self):
@@ -105,10 +107,10 @@ class NdfcDocBuilder:
 
         Mandatory
         """
-        return self._properties["module_name"]
+        return self._module_name
     @module_name.setter
     def module_name(self, value):
-        self._properties["module_name"] = value
+        self._module_name = value
 
     @property
     def module_default_state(self):
@@ -121,7 +123,7 @@ class NdfcDocBuilder:
             a valid Ansible state.
         -   Mandatory
         """
-        return self._properties["module_default_state"]
+        return self._module_default_state
 
     @module_default_state.setter
     def module_default_state(self, value):
@@ -129,7 +131,7 @@ class NdfcDocBuilder:
             msg = f"Invalid Ansible state {value}. "
             msg += f"Expected one of {','.join(sorted(self._valid_ansible_states))}"
             raise ValueError(msg)
-        self._properties["module_default_state"] = value
+        self._module_default_state = value
 
     @property
     def module_states(self):
@@ -148,7 +150,7 @@ class NdfcDocBuilder:
                     is not a valid Ansible state.
         -   Mandatory
         """
-        return self._properties["module_states"]
+        return self._module_states
     @module_states.setter
     def module_states(self, value):
         if not isinstance(value, list):
@@ -161,35 +163,37 @@ class NdfcDocBuilder:
             msg = f"Invalid Ansible state {item}. "
             msg += f"Expected one of {','.join(sorted(self._valid_ansible_states))}"
             raise ValueError(msg)
-        self._properties["module_states"] = value
+        self._module_states = value
 
     @property
     def template_all(self):
-        return self._properties["template_all"]
-    @template_all.setter
-    def template_all(self, value):
         """
         An instance of NdfcTemplateAll()
         """
-        self._properties["template_all"] = value
+        return self._template_all
+    @template_all.setter
+    def template_all(self, value):
+        self._template_all = value
 
     @property
-    def template_json(self):
-        return self._properties["template_json"]
-    @template_json.setter
-    def template_json(self, value):
+    def template_dict(self):
         """
-        Full path to a file containing the template content
-        in JSON format
+        Template content as a python dictionary.
         """
-        self._properties["template_json"] = value
+        return self._template_dict
+    @template_dict.setter
+    def template_dict(self, value):
+        self._template_dict = value
 
 
     def init_translation(self):
         """
+        ### Summary
         Builds a dictionary which maps between NDFC's expected
         parameter names and the corresponding playbook names.
-        e.g.:
+
+        For example
+
         DEAFULT_QUEUING_POLICY_CLOUDSCALE -> DEFAULT_QUEUING_POLICY_CLOUDSCALE
 
         The dictionary excludes hidden and internal parameters.
@@ -230,37 +234,45 @@ class NdfcDocBuilder:
         2. Call self.init_translation() if self.translation is None
         """
 
-        if self.template_json is None:
-            msg = "exiting. call instance.template_json first."
+        if self.template_dict is None:
+            msg = "exiting. call instance.template_dict first."
             print(f"{msg}")
             sys.exit(1)
 
-        self.ndfc_template.template_json = self.template_json
+        self.ndfc_template.template_dict = self.template_dict
         self.ndfc_template.load()
 
         self.init_translation()
 
-
     def add_module_name(self):
         method_name = inspect.stack()[0][3]
         if self.module_name is None:
-            msg = "module_name must be set before calling commit()"
+            msg = f"{self.class_name}.{method_name}: "
+            msg += f"Call {self.class_name}.module_name before calling "
+            msg += f"{self.class_name}.commit()"
             raise ValueError(msg)
         self.documentation["module"] = self.module_name
 
     def add_module_author(self):
         method_name = inspect.stack()[0][3]
         if self.module_author is None:
-            msg = "module_author must be set before calling commit()"
+            msg = f"{self.class_name}.{method_name}: "
+            msg += f"Call {self.class_name}.module_author before calling "
+            msg += f"{self.class_name}.commit()"
             raise ValueError(msg)
         self.documentation["author"] = self.module_author
 
     def add_module_state(self):
+        method_name = inspect.stack()[0][3]
         if self.module_states is None:
-            msg = "Call instance.module_states before calling instance.commit()"
+            msg = f"{self.class_name}.{method_name}: "
+            msg += f"Call {self.class_name}.module_states before calling "
+            msg += f"{self.class_name}.commit()"
             raise ValueError(msg)
         if self.module_default_state is None:
-            msg = "Call instance.module_default_state before calling instance.commit()"
+            msg = f"{self.class_name}.{method_name}: "
+            msg = f"Call {self.class_name}.module_default_state before calling "
+            msg += f"{self.class_name}.commit()"
             raise ValueError(msg)
         self.documentation["options"]["state"] = {}
         self.documentation["options"]["state"]["description"] = []
@@ -336,7 +348,7 @@ class NdfcDocBuilder:
             if len(choices) > 0:
                 if "TEMPLATES" in str(choices[0]):
                     tag = str(choices[0]).split(".")[1]
-                    choices = self.template_all.get_templates_by_tag(tag)
+                    choices = self.template_all.get_template_names_by_tag(tag)
                 suboptions[name]["choices"] = choices
 
         self.documentation["options"]["config"]["suboptions"] = {}

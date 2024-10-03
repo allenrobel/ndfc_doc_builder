@@ -8,6 +8,7 @@ Superclass for:
     - NdfcTemplates()
     - NdfcTemplateRaw()
 """
+import inspect
 import re
 import sys
 import json
@@ -17,6 +18,7 @@ class NdfcTemplate:
     Superclass for NdfcTemplate*() classes
     """
     def __init__(self):
+        self.class_name = self.__class__.__name__
         self._init_properties()
         self._init_translation()
 
@@ -24,9 +26,9 @@ class NdfcTemplate:
         """
         Initialize properties used in this class.
         """
-        self._properties = {}
-        self._properties["template"] = None
-        self._properties["template_json"] = None
+        self._template = None
+        self._template_dict = None
+        self._template_json_file = None
 
     def _init_translation(self):
         """
@@ -66,24 +68,36 @@ class NdfcTemplate:
 
     @property
     def template(self):
-        return self._properties["template"]
+        return self._template
     @template.setter
     def template(self, value):
         """
         The template contents supported by the subclass
         """
-        self._properties["template"] = value
+        self._template = value
 
     @property
-    def template_json(self):
-        return self._properties["template_json"]
-    @template_json.setter
-    def template_json(self, value):
+    def template_dict(self):
+        return self._template_dict
+    @template_dict.setter
+    def template_dict(self, value):
+        """
+        A dictionary containing the template contents.
+
+        If this is set, then template_json_file will not be used.
+        """
+        self._template_dict = value
+
+    @property
+    def template_json_file(self):
+        return self._template_json_file
+    @template_json_file.setter
+    def template_json_file(self, value):
         """
         Full path to a file containing the template content
-        in JSON format
+        in JSON format.
         """
-        self._properties["template_json"] = value
+        self._template_json_file = value
 
     @staticmethod
     def delete_key(key, item:dict):
@@ -493,13 +507,27 @@ class NdfcTemplate:
 
     def load(self):
         """
-        Load the template from a JSON file
+        Load the template from self.template_dict if it set.
+        Else, the template from the file template_json_file.
         """
-        if self.template_json is None:
-            msg = "exiting. set instance.template_json to the file "
-            msg += "path of the JSON content before calling "
-            msg += "load_template()"
-            print(f"{msg}")
-            sys.exit(1)
-        with open(self.template_json, 'r', encoding="utf-8") as handle:
-            self.template = json.load(handle)
+        method_name = inspect.stack()[0][3]
+        if self.template_dict is None and self.template_json_file is None:
+            msg = f"{self.class_name}.{method_name}: "
+            msg += f"Set either {self.class_name}.template_dict "
+            msg += f"or {self.class_name}.template_json_file "
+            msg += f"before calling {self.class_name}.{method_name}. "
+            msg += f"Got self.template_dict {self.template_dict}, "
+            msg += f"self.template_json_file {self.template_json_file}"
+            raise ValueError(msg)
+        if self.template_dict is not None:
+            msg = f"{self.class_name}.{method_name}: "
+            msg += "loading from template_dict. "
+            print(msg)
+            self.template = self.template_dict
+            return
+        if self.template_json_file is not None:
+            msg = f"{self.class_name}.{method_name}: "
+            msg += f"loading from template_json_file {self.template_json_file}"
+            print(msg)
+            with open(self.template_json_file, 'r', encoding="utf-8") as handle:
+                self.template = json.load(handle)

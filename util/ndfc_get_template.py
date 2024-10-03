@@ -8,7 +8,8 @@ Retrieve an NDFC template and write it as a JSON file.
 Usage:
     instance = NdfcGetTemplate()
     instance.ndfc = NDFC()
-    instance.template = "templates"
+    instance.template = "all" # for all templates
+    instance.template = "Easy_Fabric" # for a specific template
 etc...
 """
 import sys
