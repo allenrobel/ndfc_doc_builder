@@ -1,17 +1,51 @@
 # Usage
 
-For now, run ./util/build_*.py scripts from the directory level above ./util.
+0. The DCNM Ansible Collection must be installed and in your ``PYTHONPATH``
 
+Example
+
+```bash
+export PYTHONPATH=$PYTHONPATH:$HOME/repos/ansible_dev/dcnm_fabric/ansible_collections/cisco/dcnm
+```
+
+1. Set the following environment variables appropriately for your NDFC installation
+
+```bash
+export NDFC_USERNAME=admin
+export NDFC_PASSWORD=my_password
+export NDFC_IP4=10.1.1.1
+export NDFC_DOMAIN=local
+```
+
+2. Change directory into the top-level of wherever you cloned this repo
+
+```bash
 cd $HOME/repos/ansible_dev/ndfc_doc_builder
-./util/build_ipfm_fabric_doc.py
-./util/build_isn_fabric_doc.py
-./util/build_lan_classic_fabric_doc.py
-./util/build_vxlan_evpn_fabric_doc.py
-./util/build_vxlan_evpn_msd_fabric_doc.py
+```
+
+3. Edit the following script and modify ``template_name`` to the name of the template you want to document.
+
+```bash
+vi ./util/build_ndfc_fabric_documentation.py
+```
+
+Change:
+
+```python
+template_name = "Easy_Fabric"
+```
+
+4. Run the script
+
+```bash
+./util/build_ndfc_fabric_documentation.py
+```
+
+5. The documentation will be printed as YAML.
 
 # Manual fixes required
 
-1. type: str should be type: int due to default is int
+- type: str should be type: int due to default is int
 
                     MS_IFC_BGP_AUTH_KEY_TYPE:
                         choices:
@@ -69,7 +103,7 @@ cd $HOME/repos/ansible_dev/ndfc_doc_builder
                         required: false
                         type: str
 
-2. Defines a comma-separated range, which should be str.  default needs to have quotes "0"
+- Defines a comma-separated range, which should be str.  default needs to have quotes "0"
 
                     MST_INSTANCE_RANGE:
                         default: 0
@@ -78,7 +112,9 @@ cd $HOME/repos/ansible_dev/ndfc_doc_builder
                         required: false
                         type: str
 
-3. IPFM_FABRIC_PARAMETERS. default: 1 needs to be default: "1"
+- IPFM_FABRIC_PARAMETERS
+
+  - default: 1 needs to be default: "1"
                     LINK_STATE_ROUTING_TAG:
                         default: "1"
                         description:
@@ -86,8 +122,7 @@ cd $HOME/repos/ansible_dev/ndfc_doc_builder
                         required: false
                         type: str
 
-4. List type requires -> elements: str
-
+  - List type requires -> elements: str
 
                     NETFLOW_EXPORTER_LIST:
                         default: ''
@@ -118,8 +153,6 @@ cd $HOME/repos/ansible_dev/ndfc_doc_builder
                         required: false
                         type: list
 
-		IPFM_FABRIC_PARAMETERS
-
                     ASM_GROUP_RANGES:
                         default: ''
                         description:
@@ -134,13 +167,13 @@ cd $HOME/repos/ansible_dev/ndfc_doc_builder
 
 https://github.com/ansible-network/collection_prep?tab=readme-ov-file#doc-generator
 
+```bash
 cd $HOME/repos
 git clone https://github.com/ansible-network/collection_prep.git
 cd $HOME/repos/collection_prep
 # requires python 3.8
 source ${HOME}/py38/bin/activate
 pip install . --force
-collection_prep_add_docs -p /Users/arobel/repos/ansible_dev/dcnm_image_policy/ansible_collections/cisco/dcnm
-
-collection_prep_add_docs -p /Users/arobel/repos/ansible_dev/dcnm_fabric/ansible_collections/cisco/dcnm
+collection_prep_add_docs -p $HOME/repos/ansible_dev/dcnm_fabric/ansible_collections/cisco/dcnm
+```
 

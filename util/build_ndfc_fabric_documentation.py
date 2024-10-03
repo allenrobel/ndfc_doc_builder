@@ -4,17 +4,30 @@ This script is used to build the documentation from NDFC templates.
 
 ### Usage
 
+1. Set shell variables
+
 ```shell
 export NDFC_USERNAME="my_username" # defaults to admin
 export NDFC_PASSWORD="my_password"
 export NDFC_IP4="10.1.1.1"
 export NDFC_DOMAIN=local # defaults to local
-./build_dcnm_fabric_documentation.py
 ```
 
+2. Edit this script to change the template_name variable to the desired template name.
+
+3. Edit this script to change the other variables as needed e.g.:
+    - module_author
+    - module_name
+    - module_states
+    - module_default_state
+
+4. Run the script from the top-level of this repo
+
+```shell
+cd $HOME/repos/ndfc_doc_builder
+./util/build_ndfc_fabric_documentation.py
+```
 """
-import copy
-import json
 from util.ndfc_doc_builder import NdfcDocBuilder
 from util.ndfc_templates import NdfcTemplates
 from ansible_collections.cisco.dcnm.plugins.module_utils.common.response_handler import \
@@ -70,6 +83,6 @@ doc_builder.module_states = ["deleted", "merged", "query", "replaced"]
 doc_builder.module_default_state = "merged"
 print("Building documentation")
 doc_builder.commit()
-#doc_builder.documentation_json()
 print("Printing documentation")
+#doc_builder.documentation_json()
 doc_builder.documentation_yaml()
