@@ -2,7 +2,7 @@
 
 0. The DCNM Ansible Collection must be installed and in your ``PYTHONPATH``
 
-Example
+## Example
 
 ```bash
 export PYTHONPATH=$PYTHONPATH:$HOME/repos/ansible_dev/dcnm_fabric/ansible_collections/cisco/dcnm
@@ -29,11 +29,16 @@ cd $HOME/repos/ansible_dev/ndfc_doc_builder
 vi ./util/build_ndfc_fabric_documentation.py
 ```
 
-Change:
-
 ```python
 template_name = "Easy_Fabric"
 ```
+
+## Example template names
+
+| Template Name    | Associated Fabric Type | Notes                                        |
+| LAN_Classic      | Classic LAN            |                                              |
+| Easy_Fabric_IPFM | IP Fabric for Media    | NDFC must be in IPFM mode when script is run |
+| Easy_Fabric      | VXLAN/EVPN Fabric      |                                              |
 
 4. Run the script
 
