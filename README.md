@@ -8,36 +8,22 @@
 export PYTHONPATH=$PYTHONPATH:$HOME/repos/ansible_dev/dcnm_fabric/ansible_collections/cisco/dcnm
 ```
 
-2. Copy sender_requests.py into your DCNM Ansible Collection repo
-
-This repo has a dependency on an as-yet unreleased component of the DCNM Ansible Collection.
-We are including this component (sender_requests.py) here for now, until it is released
-within the DCNM Ansible Collection.
-
-Please copy this into your DCNM Ansible Collections repo at the following path (relative
-to the repo's top-level):
-
-```
-./plugins/module_utils/common/sender_requests.py
-```
-
-
-3. Set the following environment variables appropriately for your NDFC installation
+2. Set the following environment variables appropriately for your NDFC installation
 
 ```bash
-export NDFC_USERNAME=admin
-export NDFC_PASSWORD=my_password
-export NDFC_IP4=10.1.1.1
-export NDFC_DOMAIN=local
+export ND_USERNAME=admin
+export ND_PASSWORD=my_password
+export ND_IP4=10.1.1.1
+export ND_DOMAIN=local
 ```
 
-4. Change directory into the top-level of wherever you cloned this repo
+3. Change directory into the top-level of wherever you cloned this repo
 
 ```bash
-cd $HOME/repos/ansible_dev/ndfc_doc_builder
+cd $HOME/repos/ndfc_doc_builder
 ```
 
-5. Edit the following script and modify ``template_name`` to the name of the template you want to document.
+4. Edit the following script and modify ``template_name`` to the name of the template you want to document.
 
 ```bash
 vi ./util/build_ndfc_fabric_documentation.py
@@ -57,13 +43,13 @@ template_name = "Easy_Fabric"
 | LAN_Classic      | Classic LAN              |                                              |
 | MSD_Fabric       | Multi-Site Domain Fabric |                                              |
 
-4. Run the script
+5. Run the script
 
 ```bash
 ./util/build_ndfc_fabric_documentation.py
 ```
 
-5. The documentation will be printed as YAML.
+6. The documentation will be printed as YAML.
 
 # Manual fixes required
 
