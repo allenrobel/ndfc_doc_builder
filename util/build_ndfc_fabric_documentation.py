@@ -30,15 +30,15 @@ cd $HOME/repos/ndfc_doc_builder
 """
 from util.ndfc_doc_builder import NdfcDocBuilder
 from util.ndfc_templates import NdfcTemplates
-from ansible_collections.cisco.dcnm.plugins.module_utils.common.response_handler import \
+from plugins.module_utils.common.response_handler import \
     ResponseHandler
-from ansible_collections.cisco.dcnm.plugins.module_utils.common.rest_send_v2 import \
+from plugins.module_utils.common.rest_send_v2 import \
     RestSend
-from ansible_collections.cisco.dcnm.plugins.module_utils.common.sender_requests import \
+from plugins.module_utils.common.sender_requests import \
     Sender
-from ansible_collections.cisco.dcnm.plugins.module_utils.fabric.template_get import \
+from plugins.module_utils.fabric.template_get import \
     TemplateGet
-from ansible_collections.cisco.dcnm.plugins.module_utils.fabric.template_get_all import \
+from plugins.module_utils.fabric.template_get_all import \
     TemplateGetAll
 
 def get_template_all():
@@ -54,8 +54,9 @@ def get_template(template_name):
     instance.refresh()
     return instance.template
 
-template_name = "Easy_Fabric"
+template_name = "Default_Network_Extension_Universal"
 sender = Sender()
+print("Logging in.")
 sender.login()
 rest_send = RestSend({})
 rest_send.response_handler = ResponseHandler()
